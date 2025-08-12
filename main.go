@@ -4,19 +4,31 @@ import (
 	"bufio"
 	"fmt"
 	"langcards/models"
+	"langcards/storage"
 	"os"
-	"strings"
 	"regexp"
+	"strings"
 )
 
 func main() {
+	store := storage.NewMemoryStore()
 	reader := bufio.NewReader(os.Stdin) 
 	card, err := CreateCard(reader)
 	if err != nil {
 		fmt.Println("Creation card error")
 		return
 	}
-	fmt.Println(FormatCard(card))
+	saved := store.Add(card)
+	fmt.Println("Card successfully saved!")
+	fmt.Println(FormatCard(saved))
+	cards := store.All()
+	if len(cards) == 0 {
+		fmt.Println("Пока карточек нет")
+		} else {
+		for _, c := range cards {
+			fmt.Println(FormatCard(c))
+		}
+	}
 }
 
 func ReadLine(reader *bufio.Reader, prompt string) string {
@@ -55,8 +67,8 @@ func CreateCard(reader *bufio.Reader)  (models.Card, error)  {
 	var card models.Card
 	card.Word = ReadRequired(reader, "Enter a word: ")
 	card.Lang =  NormalizeLang(reader, "Enter a language (use 2 letters ISO-code): ")
-	card.Assoc = ReadLine(reader, "Enter an association: ")
-	card.Trans = ReadLine(reader, "Enter a translation: ")
+	card.Assoc = ReadRequired(reader, "Enter an association: ")
+	card.Trans = ReadRequired(reader, "Enter a translation: ")
 	
 	for {
         if err := ValidateCard(card); err != nil {
@@ -119,3 +131,5 @@ func ValidateCard(c models.Card) error {
 	return nil
 }
 
+
+ 
