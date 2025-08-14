@@ -46,6 +46,40 @@ func NewFileStore(filename string) (*FileStore, error) {
 	if s.nextID < 1 {
 		s.nextID = 1
 	}
-	
+
+
 	return s, nil
 } 
+
+
+func (s *FileStore) save() error {
+    // Создаём/очищаем файл (truncate)
+    f, err := os.Create(s.filename)
+    if err != nil {
+        return err
+    }
+    defer f.Close()
+
+    enc := json.NewEncoder(f)
+    enc.SetIndent("", "  ") // делаем файл читаемым человеком
+    return enc.Encode(s.cards)
+}
+
+func (s *FileStore) Add(c models.Card) (models.Card, error) {
+	c.ID = s.nextID
+	s.nextID++
+
+	s.cards = append(s.cards, c)
+
+	if err := s.save() ; err != nil {
+		s.cards = s.cards[:len(s.cards) - 1]
+		s.nextID--
+		return models.Card{}, err
+	}
+
+	return c, nil
+} 
+
+func (s *FileStore) All() []models.Card {
+    return append([]models.Card(nil), s.cards...)
+}

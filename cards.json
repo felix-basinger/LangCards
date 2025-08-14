@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "word": "il gatto",
+    "lang": "it",
+    "assoc": "an animal which makes meow-meow",
+    "trans": "a cat"
+  },
+  {
+    "id": 2,
+    "word": "una maccina",
+    "lang": "it",
+    "assoc": "something with 4 wheels and engine",
+    "trans": "a car"
+  }
+]

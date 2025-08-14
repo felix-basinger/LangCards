@@ -11,24 +11,47 @@ import (
 )
 
 func main() {
-	store := storage.NewMemoryStore()
 	reader := bufio.NewReader(os.Stdin) 
-	card, err := CreateCard(reader)
+	store, err := storage.NewFileStore("cards.json")
 	if err != nil {
-		fmt.Println("Creation card error")
+		fmt.Println("store init error:", err)
 		return
 	}
-	saved := store.Add(card)
-	fmt.Println("Card successfully saved!")
-	fmt.Println(FormatCard(saved))
-	cards := store.All()
-	if len(cards) == 0 {
-		fmt.Println("Пока карточек нет")
-		} else {
-		for _, c := range cards {
-			fmt.Println(FormatCard(c))
-		}
+
+	existing := store.All()
+	if len(existing) > 0 {
+		fmt.Println("Already saved cards:")
+        for _, c := range existing {
+            fmt.Println(FormatCard(c))
+        }
+        fmt.Println()
 	}
+
+	card, err := CreateCard(reader) 
+	if err != nil {
+		fmt.Println("Creation card error:", err)
+        return
+	}
+
+	if err := ValidateCard(card); err != nil {
+        fmt.Println("Validation error:", err)
+        return
+    }
+
+	saved, err := store.Add(card)
+    if err != nil {
+        fmt.Println("Save error:", err)
+        return
+    }
+
+	fmt.Println("\nSaved:")
+    fmt.Println(FormatCard(saved))
+
+	fmt.Println("\nAll cards now:")
+    for _, c := range store.All() {
+        fmt.Println(FormatCard(c))
+    }
+
 }
 
 func ReadLine(reader *bufio.Reader, prompt string) string {
